@@ -1,5 +1,5 @@
 
-function nlma_irf = nlma_irf_plot(M_,options_,var_list_)
+function nlma_irf = nlma_irf(M_,options_,var_list_)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % nlma_irf_plot.m
@@ -58,7 +58,9 @@ global oo_
 %--------------------------------------------------------------------------
 % 3. Plot results
 %--------------------------------------------------------------------------
-  for jj = 1:M_.exo_nbr % Loop over shocks
+  if options_.nograph == 0
+
+    for jj = 1:M_.exo_nbr % Loop over shocks
 
       irf = irf_all{jj,1};
       
@@ -169,4 +171,6 @@ global oo_
             end
           
       end  % Loop over variables ends
-  end % Loop over shocks ends
+    end % Loop over shocks ends
+  
+  end

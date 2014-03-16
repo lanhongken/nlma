@@ -1,5 +1,5 @@
 
-function nlma_simul = nlma_simul_plot(M_,options_,var_list_)
+function nlma_simul = nlma_simul(M_,options_,var_list_)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % nlma_simul_plot.m
@@ -53,6 +53,8 @@ global oo_
 % 3. Plot results
 %--------------------------------------------------------------------------
 
+ if options_.nograph == 0
+     
   for ii = 1:length(variable_select) % Loop over all selected variables
           
           % Plot first order accuate simulation
@@ -167,4 +169,6 @@ global oo_
                        legend({'Steady-State','plus Risk Adjustment'});
             end
           
-  end  % Loop over variables ends
+   end  % Loop over variables ends
+   
+ end
