@@ -71,13 +71,13 @@ The remaining 2 functions are called by all the 4 main functions
 
 This software is so far in the form of matlab functions, and can be called after Dynare's stoch_simul command directly
 
-- Put a copy of this software in Dynare's matlab folder, e.g.,
+- Put a copy of this software. It is recommended to put it in Dynare's `contrib` folder, e.g.,
 
-       `C:\dynare\4.4.2\matlab\nlma`
+       `C:\dynare\4.4.2\contrib\nlma`
 
 - Add the above path to matlab working path (assuming Dynare's matlab folder has already been added), i.e.,         
 
-       `>> addpath C:\dynare\4.4.2\matlab\nlma`
+       `>> addpath C:\dynare\4.4.2\contrib\nlma`
 
 - In a .mod file, call the desired nlma main function(s) after stoch_simul command, e.g.,
 

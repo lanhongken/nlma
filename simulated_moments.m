@@ -63,7 +63,7 @@ function simul_moments = simulated_moments(M_,oo_, options_,var_list_,pruning_or
 %--------------------------------------------------------------------------
   shock_sequence = oo_.exo_simul';
   simul_length   = options_.periods;
-  y = pruning_abounds(M_,options_,simul_length, shock_sequence, pruning_order,pruning_type);
+  y = pruning_abounds(M_,options_,shock_sequence, simul_length,pruning_order,pruning_type);
   y = y.total(ivar,options_.drop+1:end)';
 
 %--------------------------------------------------------------------------
