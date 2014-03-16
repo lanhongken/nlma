@@ -82,8 +82,11 @@ This software is so far in the form of matlab functions, and can be called after
 - In a .mod file, call the desired nlma main function(s) after stoch_simul command, e.g.,
 
        `...`</br>
-       `stoch_simul(order = 3);`   
+       
+       `stoch_simul(order = 3);`</br>   
+       
        `nlma_theoretical_moments = nlma_th_moments(M_,oo_,options_,var_list_);`</br>
+       
        `nlma_irf = nlma_irf_plot(M_,options_,var_list_);`
 
   This `.mod` file asks Dynare to solve the model to third order, and ask nlma to compute theoretical moments up to the third order. These moments will be saved to a structure array with the name `nlma_theoretical_moments` in matlab's workspace. Next, it asks nlma to compute and plot impulse responses up to the third order. The impulse response will be saved to a structure array with the name `nlma_irf` in matlab's workspace.
@@ -91,8 +94,11 @@ This software is so far in the form of matlab functions, and can be called after
  - In recent versions of Dynare, higher order impulse responses are computed on the basis of repeated simulations, which may take a while when a model has many variables. The following example shows how to disable Dynare's impulse responses and compute nlma impulse responses of higher order only
        
        `...`</br>
+
        `stoch_simul(irf = 0, order = 3);`</br>
-       `options_.irf = 40`;        
+       
+       `options_.irf = 40;`</br>        
+       
        `nlma_irf = nlma_irf_plot(M_,options_,var_list_);`
 
   This `.mod` file disables Dynare's impulse responses by setting `irf=0` in `stoch_simul` command. Then it sets `options_.irf=40;` that asks nlma to compute and plot third order accurate impulse responses out to 40 periods.
@@ -131,7 +137,8 @@ This version use the **RECURSIVE REPRESENTATION** of nonlinear moving average po
 
 
  - `ghs2_nlma = [  ghx(1:nstatic,:)*ghs2_state_nlma+ghs2(1:nstatic,:)`</p>   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `ghs2_state_nlma`</p>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`ghx(nstatic+npred+1:M_.endo_nbr,:)*ghs2_state_nlma+ghs2(nstatic+npred+1:M_.endo_nbr,:) ]`;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`ghx(nstatic+npred+1:M_.endo_nbr,:)*ghs2_state_nlma+ghs2(nstatic+npred+1:M_.endo_nbr,:) ]`;</p>
+
  
     - `ghs2_state_nlma = (eye(npred)-ghx(nstatic+1:nstatic+npred,:))\(ghs2(nstatic+1:nstatic+npred,:));` </p>
 
