@@ -47,21 +47,33 @@ global oo_
   % Preallocation
     irf_all = cell(M_.exo_nbr,1);
     
-  % Compute irf
-    for jj = 1 : M_.exo_nbr
+%   % Compute irf
+%     for jj = 1 : M_.exo_nbr
+%         irf_shock_sequence = zeros(M_.exo_nbr,T); % Pre-allocate and reset irf shock sequence
+%         irf_shock_sequence(jj,1) = irf_shock_scale*(M_.Sigma_e(jj,jj))^(1/2);
+%         irf_all{jj,1} = pruning_abounds( M_, options_, irf_shock_sequence, T, options_.order, 'lan_meyer-gohde' );
+%     end
+%     nlma_irf.irf_all = irf_all;
+    
+  % Compute irf, allowing correlated shocks
+    SS(M_.exo_names_orig_ord,M_.exo_names_orig_ord) = M_.Sigma_e+1e-14*eye(M_.exo_nbr);
+    cs = transpose(chol(SS));
+    irf_shocks_indx = getIrfShocksIndx();
+    for jj = irf_shocks_indx
         irf_shock_sequence = zeros(M_.exo_nbr,T); % Pre-allocate and reset irf shock sequence
-        irf_shock_sequence(jj,1) = irf_shock_scale*(M_.Sigma_e(jj,jj))^(1/2);
+        irf_shock_sequence(:,1) = irf_shock_scale*cs(M_.exo_names_orig_ord,jj);
         irf_all{jj,1} = pruning_abounds( M_, options_, irf_shock_sequence, T, options_.order, 'lan_meyer-gohde' );
     end
-    nlma_irf.irf_all = irf_all;
-
+    nlma_irf.irf_all = irf_all;    
+    
 %--------------------------------------------------------------------------
 % 3. Plot results
 %--------------------------------------------------------------------------
   if options_.nograph == 0
 
-    for jj = 1:M_.exo_nbr % Loop over shocks
-
+    % for jj = 1:M_.exo_nbr % Loop over shocks
+    for jj = irf_shocks_indx % Loop over (maybe correlated) shocks
+      
       irf = irf_all{jj,1};
       
       for ii = 1:length(variable_select) % For each shock, loop over all selected variables
@@ -76,7 +88,9 @@ global oo_
                  legend({'First-Order Accurate'});
                  hold on;
                  plot(irf_xaxis,zeros(1, T),'k-');
-                 hold off; axis tight;
+                 hold off; 
+                 %axis tight;
+                 xlim([1 T]);
               
           % Plot second order accurate irf and its decomposition
             elseif options_.order==2
@@ -91,21 +105,27 @@ global oo_
                        legend({'Second-Order Accurate','First-Order Accurate'})
                        hold on;
                        plot( irf_xaxis,zeros(1, T),'k-' );
-                       hold off; axis tight;
+                       hold off; 
+                       %axis tight;
+                       xlim([1 T]);
                 % First order component of second order accurate irf
                   subplot(3,3,[7]); 
                        plot(irf_xaxis,irf.first(variable_select(ii),:),'b')
                        title('First-Order Component'); ylabel('Deviations'); xlabel('Periods');
                        hold on;
                        plot(irf_xaxis,zeros(1, T),'k-');
-                       hold off; axis tight;
+                       hold off; 
+                       %axis tight;
+                       xlim([1 T]);
                 % Second order component of second order accurate irf
                   subplot(3,3,[8]); 
                        plot(irf_xaxis,irf.second(variable_select(ii),:),'b')
                        title('Second-Order Component'); ylabel('Deviations');  xlabel('Periods');
                        hold on;
                        plot(irf_xaxis,zeros(1, T),'k-');
-                       hold off; axis tight;
+                       hold off; 
+                       %axis tight;
+                       xlim([1 T]);
                 % Constant risk correction term
                   ghs2_nlma = oo_.dr.ghs2_nlma(oo_.dr.inv_order_var,:);
                   subplot(3,3,[9]); 
@@ -113,6 +133,7 @@ global oo_
                              irf_xaxis, repmat(oo_.dr.ys(variable_select(ii)) + 0.5*ghs2_nlma(variable_select(ii)), [1 T]),'b-.');
                        title('Steady-State and Constant'); 
                        legend({'Steady-State','plus Risk Adjutsment'});
+                       xlim([1 T]);
                 
           % Plot third order accurate irf and its decomposition
             elseif options_.order==3
@@ -132,42 +153,53 @@ global oo_
                        legend({'Third-Order Accurate','Second-Order Accurate','First-Order Accurate'})
                        hold on;
                        plot( irf_xaxis,zeros(1, T),'k-');
-                       hold off; axis tight;
+                       hold off; 
+                       %axis tight;
+                       xlim([1 T]);
                 % First order component of third order accurate irf
                   subplot(4,3,[7]); 
                        plot( irf_xaxis, irf.first(variable_select(ii),:),'b');
                        title('First-Order Component');  ylabel('Deviations');   xlabel('Periods');
                        hold on;
                        plot( irf_xaxis, zeros(1, T),'k-');
-                       hold off; axis tight;
+                       hold off; 
+                       %axis tight;
+                       xlim([1 T]);
                 % Second order component of third order accurate irf
                   subplot(4,3,[8]); 
                        plot( irf_xaxis, irf.second(variable_select(ii),:),'b')
                        title('Second-Order Component');    ylabel('Deviations');   xlabel('Periods');
                        hold on;
                        plot( irf_xaxis, zeros(1, T),'k-');
-                       hold off; axis tight;
+                       hold off; 
+                       %axis tight;
+                       xlim([1 T]);
                 % Time varying risk correct term
                   subplot(4,3,[10]); 
                        plot( irf_xaxis,irf.first_sigma_2(variable_select(ii),:),'b');
                        title('Risk Correction to First-Order'); ylabel('Deviations'); xlabel('Periods');
                        hold on;
                        plot( irf_xaxis,zeros(1, T),'k-');
-                       hold off; axis tight;
+                       hold off; 
+                       %axis tight;
+                       xlim([1 T]);
                 % Third order component of third order accurate irf
                   subplot(4,3,[11]); 
                        plot( irf_xaxis, irf.third(variable_select(ii),:),'b');
                        title('Third-Order Component');  ylabel('Deviations');   xlabel('Periods');
                        hold on;
                        plot( irf_xaxis, zeros(1, T),'k-');
-                       hold off;
+                       hold off; 
+                       %axis tight;
+                       xlim([1 T]);
                 % Constant risk correction term
                   ghs2_nlma = oo_.dr.ghs2_nlma(oo_.dr.inv_order_var,:);
                   subplot(4,3,[9]); 
                        plot( irf_xaxis, repmat(oo_.dr.ys(variable_select(ii)), [1 T]),'b',...
                              irf_xaxis, repmat(oo_.dr.ys(variable_select(ii))+ 0.5*ghs2_nlma(variable_select(ii)), [1 T]),'b-.');
                        title('Steady-State and Constant');
-                       legend({'Steady-State','plus Risk Adjustment'});
+                       legend({'Steady-State','plus Risk Adjustment'}); 
+                       xlim([1 T]);
             end
           
       end  % Loop over variables ends
