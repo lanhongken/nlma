@@ -105,13 +105,13 @@ This software is so far in the form of matlab functions, and can be called after
   
   It is worth noting that neither `nlma_irf.m` nor `nlma_simul.m` does joint plots. The impulse response, for example, of each and every variable, to each and every shock, is plotted separately, i.e., there would be `M_.endo_nbr*M_.exo_nbr` figures in total. It is recommended, for a model with many variables and shocks, to plot a subset of variables of interest at a time. To do this, just specify the subset of variables after `stoch_simul` command. This choice of variable will be passed to `nlma_irf.m` automatically. Take `example1.mod` in Dynare for example
   
-     ...
+     `...`
      
-     stoch_simul(irf = 0, order = 3) c k;
+     `stoch_simul(irf = 0, order = 3) c k;`
      
-     options_.irf = 40;
+     `options_.irf = 40;`
      
-     nlma_irf = nlma_irf(M_, options_,var_list_);
+     `nlma_irf = nlma_irf(M_, options_,var_list_);`
      
 This plots the impulse responses of consumption and capital only.
   
