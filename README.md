@@ -101,9 +101,9 @@ This software is so far in the form of matlab functions, and can be called after
        
        `nlma_irf = nlma_irf(M_,options_,var_list_);`
 
-  This `.mod` file disables Dynare's impulse responses by setting `irf=0` in `stoch_simul` command. Then it sets `options_.irf=40;` that asks nlma to compute and plot third order accurate impulse responses out to 40 periods.
+  This `.mod` file disables Dynare's impulse responses by setting `irf=0` in `stoch_simul` command. Then it sets `options_.irf=40;` that asks nlma to compute and plot third order accurate impulse responses out to 40 periods.</p>
   
-  It is worth noting that neither `nlma_irf.m` nor `nlma_simul.m` does joint plots. The impulse response, for example, of each and every variable, to each and every shock, is plotted separately, i.e., there would be `M_.endo_nbr*M_.exo_nbr` figures in total. It is recommended, for a model with many variables and shocks, to plot a subset of variables of interest at a time. To do this, just specify the subset of variables after `stoch_simul` command. This choice of variable will be passed to `nlma_irf.m` automatically. Take `example1.mod` in Dynare for example
+It is worth noting that neither `nlma_irf.m` nor `nlma_simul.m` does joint plots. The impulse response, for example, of each and every variable, to each and every shock, is plotted separately, i.e., there would be `M_.endo_nbr*M_.exo_nbr` figures in total. It is recommended, for a model with many variables and shocks, to plot a subset of variables of interest at a time. To do this, just specify the subset of variables after `stoch_simul` command. This choice of variable will be passed to `nlma_irf.m` automatically. Take `example1.mod` in Dynare for example
   
      `...`
      
