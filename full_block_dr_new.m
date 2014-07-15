@@ -32,9 +32,9 @@ if options_.order>=3 %make sure the solution is a third-order solution (otherwis
     exo_det_simul = [];
     [numeric_version] = return_dynare_version(dynare_version);
     if numeric_version<4.3 %Starting in Dynare 4.3.0, dr1 is removed. 
-        [oo_.dr,~,~,~,~] = dr1(oo_.dr,0,M_,options_,oo_);
+        [oo_.dr,waste1,waste2,waste3,waste4] = dr1(oo_.dr,0,M_,options_,oo_);
     elseif numeric_version>=4.3 %replace with stochastic_solvers in 4.3
-        [oo_.dr,~] = stochastic_solvers(oo_.dr,0,M_,options_,oo_);   
+        [oo_.dr,waste1] = stochastic_solvers(oo_.dr,0,M_,options_,oo_);   
     else
         disp('Error, no certainty evuivalent dr calculated');
     end;

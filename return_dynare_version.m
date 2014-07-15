@@ -21,5 +21,5 @@ dynare_ver=dynare_version;
 dynare_ver = strtok(dynare_ver, '-'); % unstable builds have a version string of the form 4.5-unstable
 [dynare_ver_1,dynare_ver_remain] = strtok(dynare_ver, '.');
 [dynare_ver_2,dynare_ver_remain2] = strtok(dynare_ver_remain, '.');
-[dynare_ver_3,~] = strtok(dynare_ver_remain2, '.');
+[dynare_ver_3,waste] = strtok(dynare_ver_remain2, '.');
 numeric_version=str2double([dynare_ver_1 '.' dynare_ver_2 dynare_ver_3]);
