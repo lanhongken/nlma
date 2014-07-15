@@ -28,7 +28,7 @@ global oo_
 % 1. Build variable selector
 %--------------------------------------------------------------------------
   if isempty(var_list_)==0
-     [waste, variable_select] = ismember(cellstr(var_list_), cellstr(M_.endo_names));
+     [~, variable_select] = ismember(cellstr(var_list_), cellstr(M_.endo_names));
   else
      variable_select=1:M_.endo_nbr;
   end
