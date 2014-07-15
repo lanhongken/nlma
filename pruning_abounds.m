@@ -69,14 +69,19 @@ global oo_
   % they can be found in M_
     [numeric_version] = return_dynare_version(dynare_version);
     if numeric_version >= 4.4 
-        oo_.dr.nstatic = M_.nstatic;
-        oo_.dr.npred = M_.nspred; % note M_.nspred = M_.npred+M_.nboth;
-        oo_.dr.nboth = M_.nboth;
-        oo_.dr.nfwrd = M_.nfwrd;
+        nstatic = M_.nstatic;
+        nspred = M_.nspred; % note M_.nspred = M_.npred+M_.nboth;
+        nboth = M_.nboth;
+        nfwrd = M_.nfwrd;
+    else
+        nstatic = oo_.dr.nstatic;
+        nspred = oo_.dr.npred;
+        nboth = oo_.dr.nboth;
+        nfwrd = oo_.dr.nfwrd;
     end
 
   % Build state variable selector
-    select_state = oo_.dr.nstatic+1:oo_.dr.nstatic+oo_.dr.npred;
+    select_state = nstatic+1:nstatic+nspred;
 
 %--------------------------------------------------------------------------
 % 1. Simulate first order solution for all the algorithms
@@ -140,10 +145,10 @@ global oo_
      % Lan and Meyer-gohde's second order solution
        if strcmp(pruning_type, 'lan_meyer-gohde')
           % Compute nlma's y_sigma^2
-            ghs2_state_nlma = (eye(oo_.dr.npred)-oo_.dr.ghx(oo_.dr.nstatic+1:oo_.dr.nstatic+oo_.dr.npred,:))\(oo_.dr.ghs2(oo_.dr.nstatic+1:oo_.dr.nstatic+oo_.dr.npred,:));
-            ghs2_nlma = [ oo_.dr.ghx(1:oo_.dr.nstatic,:)*ghs2_state_nlma+oo_.dr.ghs2(1:oo_.dr.nstatic,:)
+            ghs2_state_nlma = (eye(nspred)-oo_.dr.ghx(nstatic+1:nstatic+nspred,:))\(oo_.dr.ghs2(nstatic+1:nstatic+nspred,:));
+            ghs2_nlma = [ oo_.dr.ghx(1:nstatic,:)*ghs2_state_nlma+oo_.dr.ghs2(1:nstatic,:)
                           ghs2_state_nlma
-                          oo_.dr.ghx(oo_.dr.nstatic+oo_.dr.npred+1:M_.endo_nbr,:)*ghs2_state_nlma+oo_.dr.ghs2(oo_.dr.nstatic+oo_.dr.npred+1:M_.endo_nbr,:)]; 
+                          oo_.dr.ghx(nstatic+nspred+1:M_.endo_nbr,:)*ghs2_state_nlma+oo_.dr.ghs2(nstatic+nspred+1:M_.endo_nbr,:)]; 
           % Save results
             oo_.dr.ghs2_state_nlma = ghs2_state_nlma;
             oo_.dr.ghs2_nlma = ghs2_nlma;
@@ -266,15 +271,15 @@ global oo_
     % Lan and Meyer-Gohde's third order solution   
       if strcmp(pruning_type, 'lan_meyer-gohde')
          % Compute nlma's y_sigma^2
-           ghs2_state_nlma = (eye(oo_.dr.npred)-oo_.dr.ghx(oo_.dr.nstatic+1:oo_.dr.nstatic+oo_.dr.npred,:))\(oo_.dr.ghs2(oo_.dr.nstatic+1:oo_.dr.nstatic+oo_.dr.npred,:));
-           ghs2_nlma = [ oo_.dr.ghx(1:oo_.dr.nstatic,:)*ghs2_state_nlma+oo_.dr.ghs2(1:oo_.dr.nstatic,:)
+           ghs2_state_nlma = (eye(nspred)-oo_.dr.ghx(nstatic+1:nstatic+nspred,:))\(oo_.dr.ghs2(nstatic+1:nstatic+nspred,:));
+           ghs2_nlma = [ oo_.dr.ghx(1:nstatic,:)*ghs2_state_nlma+oo_.dr.ghs2(1:nstatic,:)
                          ghs2_state_nlma
-                         oo_.dr.ghx(oo_.dr.nstatic+oo_.dr.npred+1:M_.endo_nbr,:)*ghs2_state_nlma+oo_.dr.ghs2(oo_.dr.nstatic+oo_.dr.npred+1:M_.endo_nbr,:)]; 
+                         oo_.dr.ghx(nstatic+nspred+1:M_.endo_nbr,:)*ghs2_state_nlma+oo_.dr.ghs2(nstatic+nspred+1:M_.endo_nbr,:)]; 
          % Compute nlma's y_sigma^2e and y_sigma^2y^state
            % y_sigma^2e           
              ghuss_nlma = oo_.dr.ghuss + oo_.dr.ghxu*alt_kron(ghs2_state_nlma,eye(M_.exo_nbr));
            % y_sigma^2y^state
-             ghxss_nlma = oo_.dr.ghxss + oo_.dr.ghxx*alt_kron(ghs2_state_nlma,eye(oo_.dr.npred));
+             ghxss_nlma = oo_.dr.ghxss + oo_.dr.ghxx*alt_kron(ghs2_state_nlma,eye(nspred));
          % Save results
            oo_.dr.ghs2_state_nlma = ghs2_state_nlma;
            oo_.dr.ghs2_nlma = ghs2_nlma;
