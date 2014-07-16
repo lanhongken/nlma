@@ -20,7 +20,7 @@ function oo_=full_block_dr_new(oo_,M_,options_)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-if options_.order>=3 %make sure the solution is a third-order solution (otherwise, everything is already provided by Dynare)
+if options_.order>=3 && options_.pruning == 0 %make sure the solution is a third-order unpruned solution (otherwise, everything is already provided by Dynare)
 %% Recover the certainty equivalent decision rule   
     options_.order = 1;
     if isempty(options_.qz_criterium)
