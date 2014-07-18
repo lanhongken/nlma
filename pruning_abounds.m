@@ -1,4 +1,4 @@
-function simulations = pruning_abounds( M_, options_, shock_sequence, simul_length, pruning_order, pruning_type )
+function simulations = pruning_abounds( M_, options_, shock_sequence, simul_length, pruning_order, pruning_type, initial_state )
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % pruning_abounds.m
@@ -63,7 +63,7 @@ function simulations = pruning_abounds( M_, options_, shock_sequence, simul_leng
   
 global oo_
 %--------------------------------------------------------------------------
-% 1. Dynare version check
+% 0.1. Dynare version check
 %--------------------------------------------------------------------------
   % Starting in Dynare 4.4.0, the following fields are no longer in oo_.dr, 
   % they can be found in M_
@@ -71,29 +71,53 @@ global oo_
     if numeric_version >= 4.4 
         nstatic = M_.nstatic;
         nspred = M_.nspred; % note M_.nspred = M_.npred+M_.nboth;
-        nboth = M_.nboth;
-        nfwrd = M_.nfwrd;
+        % nboth = M_.nboth;
+        % nfwrd = M_.nfwrd;
     else
         nstatic = oo_.dr.nstatic;
         nspred = oo_.dr.npred;
-        nboth = oo_.dr.nboth;
-        nfwrd = oo_.dr.nfwrd;
+        % nboth = oo_.dr.nboth;
+        % nfwrd = oo_.dr.nfwrd;
     end
 
   % Build state variable selector
     select_state = nstatic+1:nstatic+nspred;
 
 %--------------------------------------------------------------------------
+% 0.2. Set up initial value of the state and pre-allocate memory
+%--------------------------------------------------------------------------
+    
+    simul_length_p1 = simul_length + 1;
+    
+    simulation_first = zeros(M_.endo_nbr,simul_length_p1);
+    if pruning_order >= 2
+        simulation_second = zeros(M_.endo_nbr,simul_length_p1);
+        if pruning_order >= 3
+            simulation_third = zeros(M_.endo_nbr,simul_length_p1);
+            simulation_first_sigma_2 = zeros(M_.endo_nbr,simul_length_p1);
+        end
+    end
+    
+    if nargin >= 7
+        simulation_first( :, 1 ) = initial_state.first( oo_.dr.order_var );
+        if pruning_order >= 2
+            simulation_second( :, 1 ) = initial_state.second( oo_.dr.order_var );
+            if pruning_order >= 3
+                simulation_third( :, 1 ) = initial_state.third( oo_.dr.order_var );
+                simulation_first_sigma_2( :, 1 ) = initial_state.first_sigma_2( oo_.dr.order_var );
+            end
+        end
+    end
+    
+%--------------------------------------------------------------------------
 % 1. Simulate first order solution for all the algorithms
 %--------------------------------------------------------------------------
   if pruning_order == 1
-    simulation_first = zeros(M_.endo_nbr,simul_length);
     E = shock_sequence;
-    simulation_first(:,1)=oo_.dr.ghu*E(:,1); 
-    for t=2:simul_length
-      simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t);
+    for t=2:simul_length_p1
+      simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t-1);
     end
-    simulations.first=simulation_first(oo_.dr.inv_order_var,:);
+    simulations.first=simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
     simulations.total=simulations.first+repmat(oo_.dr.ys,[1 simul_length]);    
   end
 
@@ -101,44 +125,36 @@ global oo_
 % 2. Simulate second order pruned solutions
 %--------------------------------------------------------------------------
   if pruning_order == 2
-     simulation_first=zeros(M_.endo_nbr,simul_length);
-     simulation_second=zeros(M_.endo_nbr,simul_length);
     
      % Kim et al's second order pruned solution
        if strcmp(pruning_type,'kim_et_al')
           E = shock_sequence;
-          simulation_first(:,1)=oo_.dr.ghu*E(:,1);
-          exe=alt_kron(E(:,1),E(:,1));
-          simulation_second(:,1)=(1/2)*(oo_.dr.ghuu*exe+oo_.dr.ghs2);
-          for t=2:simul_length
-               simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t);
-               exe=alt_kron(E(:,t),E(:,t));
-               sxe=alt_kron(simulation_first(select_state,t-1),E(:,t));
+          for t=2:simul_length_p1
+               simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t-1);
+               exe=alt_kron(E(:,t-1),E(:,t-1));
+               sxe=alt_kron(simulation_first(select_state,t-1),E(:,t-1));
                sxs=alt_kron(simulation_first(select_state,t-1),simulation_first(select_state,t-1));
                simulation_second(:,t)= oo_.dr.ghx*simulation_second(select_state,t-1)...
                                        +(1/2)*(oo_.dr.ghxx*sxs+2*oo_.dr.ghxu*sxe+oo_.dr.ghuu*exe+oo_.dr.ghs2);
           end
-          simulations.first=simulation_first(oo_.dr.inv_order_var,:);
-          simulations.second=simulation_second(oo_.dr.inv_order_var,:);
+          simulations.first=simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
+          simulations.second=simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);
           simulations.total=simulations.second+simulations.first+repmat(oo_.dr.ys,[1 simul_length]);
        end
     
      % Den haan and de Wind's second order pruned solution
        if strcmp(pruning_type,'den_haan_de_wind')
           E = shock_sequence;
-          simulation_first(:,1)=oo_.dr.ghu*E(:,1);
-          exe = alt_kron(E(:,1),E(:,1));
-          simulation_second(:,1)=(1/2)*oo_.dr.ghuu*exe;
-          for t=2:simul_length
-               simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t);
-               exe=alt_kron(E(:,t),E(:,t));
-               sxe=alt_kron(simulation_first(select_state,t-1),E(:,t));
+          for t=2:simul_length_p1
+               simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t-1);
+               exe=alt_kron(E(:,t-1),E(:,t-1));
+               sxe=alt_kron(simulation_first(select_state,t-1),E(:,t-1));
                sxs=alt_kron(simulation_first(select_state,t-1),simulation_first(select_state,t-1));
                simulation_second(:,t)= oo_.dr.ghx*simulation_second(select_state,t-1)...
                                        +(1/2)*(oo_.dr.ghxx*sxs+2*oo_.dr.ghxu*sxe+oo_.dr.ghuu*exe);
           end
-          simulations.first=simulation_first(oo_.dr.inv_order_var,:);
-          simulations.second=simulation_second(oo_.dr.inv_order_var,:);
+          simulations.first=simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
+          simulations.second=simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);
           simulations.total=simulations.second+simulations.first+repmat(oo_.dr.ys+(1/2)*oo_.dr.ghs2(oo_.dr.inv_order_var),[1 simul_length]);
        end
       
@@ -154,19 +170,16 @@ global oo_
             oo_.dr.ghs2_nlma = ghs2_nlma;
           % Simulation
             E = shock_sequence;
-            simulation_first(:,1) = oo_.dr.ghu*E(:,1);
-            exe = alt_kron(E(:,1),E(:,1));
-            simulation_second(:,1) = (1/2)*oo_.dr.ghuu*exe;
-            for t = 2:simul_length
-                simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t);
-                exe = alt_kron(E(:,t),E(:,t));
-                sxe = alt_kron(simulation_first(select_state,t-1),E(:,t));
+            for t = 2:simul_length_p1
+                simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t-1);
+                exe = alt_kron(E(:,t-1),E(:,t-1));
+                sxe = alt_kron(simulation_first(select_state,t-1),E(:,t-1));
                 sxs = alt_kron(simulation_first(select_state,t-1),simulation_first(select_state,t-1));
                 simulation_second(:,t) = oo_.dr.ghx*simulation_second(select_state,t-1)...
                                          +(1/2)*( oo_.dr.ghxx*sxs+2*oo_.dr.ghxu*sxe+oo_.dr.ghuu*exe );
             end
-            simulations.first = simulation_first(oo_.dr.inv_order_var,:);
-            simulations.second = simulation_second(oo_.dr.inv_order_var,:);
+            simulations.first = simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
+            simulations.second = simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);
             simulations.total = simulations.second + simulations.first...
                                  +repmat( oo_.dr.ys + 0.5*ghs2_nlma(oo_.dr.inv_order_var,:),[1 simul_length] );
        end
@@ -182,36 +195,27 @@ global oo_
          % the blocks of the third order policy function ghxxx etc.
             oo_ = full_block_dr_new(oo_,M_,options_);
      end
-     simulation_first=zeros(M_.endo_nbr,simul_length);
-     simulation_second=zeros(M_.endo_nbr,simul_length);
-     simulation_third=zeros(M_.endo_nbr,simul_length);
-     simulations.first_sigma_2=zeros(M_.endo_nbr,simul_length);
      
      % Andreasen's third order pruned solution
        if strcmp(pruning_type,'andreasen')
           E = shock_sequence;
-          simulation_first(:,1)=oo_.dr.ghu*E(:,1);
-          exe=alt_kron(E(:,1),E(:,1));
-          simulation_second(:,1)=(1/2)*(oo_.dr.ghuu*exe+oo_.dr.ghs2);
-          simulation_first_sigma_2(:,1)=(1/2)*(oo_.dr.ghuss*E(:,1));
-          simulation_third(:,1)=(1/6)*oo_.dr.ghuuu*alt_kron(E(:,1),exe);
-          for t=2:simul_length
-              simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t);
-              exe=alt_kron(E(:,t),E(:,t));
-              sxe=alt_kron(simulation_first(select_state,t-1),E(:,t));
+          for t=2:simul_length_p1
+              simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t-1);
+              exe=alt_kron(E(:,t-1),E(:,t-1));
+              sxe=alt_kron(simulation_first(select_state,t-1),E(:,t-1));
               sxs=alt_kron(simulation_first(select_state,t-1),simulation_first(select_state,t-1));
               simulation_second(:,t)= oo_.dr.ghx*simulation_second(select_state,t-1)...
                                       +(1/2)*(oo_.dr.ghxx*sxs+2*oo_.dr.ghxu*sxe+oo_.dr.ghuu*exe+oo_.dr.ghs2);
-              simulation_first_sigma_2(:,t)=oo_.dr.ghx*simulation_first_sigma_2(select_state,t-1)+(1/2)*(oo_.dr.ghxss*simulation_first(select_state,t-1)+oo_.dr.ghuss*E(:,t));
+              simulation_first_sigma_2(:,t)=oo_.dr.ghx*simulation_first_sigma_2(select_state,t-1)+(1/2)*(oo_.dr.ghxss*simulation_first(select_state,t-1)+oo_.dr.ghuss*E(:,t-1));
               simulation_third(:,t)=oo_.dr.ghx*simulation_third(select_state,t-1)...
-                                     +(1/6)*(oo_.dr.ghxxx*alt_kron(simulation_first(select_state,t-1),sxs)+oo_.dr.ghuuu*alt_kron(E(:,t),exe))...
-                                     +(1/2)*(oo_.dr.ghxxu*alt_kron(sxs,E(:,t))+oo_.dr.ghxuu*alt_kron(simulation_first(select_state,t-1),exe))...
-                                     +oo_.dr.ghxx*alt_kron(simulation_second(select_state,t-1),simulation_first(select_state,t-1))+oo_.dr.ghxu*alt_kron(simulation_second(select_state,t-1),E(:,t));
+                                     +(1/6)*(oo_.dr.ghxxx*alt_kron(simulation_first(select_state,t-1),sxs)+oo_.dr.ghuuu*alt_kron(E(:,t-1),exe))...
+                                     +(1/2)*(oo_.dr.ghxxu*alt_kron(sxs,E(:,t-1))+oo_.dr.ghxuu*alt_kron(simulation_first(select_state,t-1),exe))...
+                                     +oo_.dr.ghxx*alt_kron(simulation_second(select_state,t-1),simulation_first(select_state,t-1))+oo_.dr.ghxu*alt_kron(simulation_second(select_state,t-1),E(:,t-1));
           end
-          simulations.first=simulation_first(oo_.dr.inv_order_var,:);
-          simulations.second=simulation_second(oo_.dr.inv_order_var,:);
-          simulations.first_sigma_2=simulation_first_sigma_2(oo_.dr.inv_order_var,:);
-          simulations.third=simulation_third(oo_.dr.inv_order_var,:);
+          simulations.first=simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
+          simulations.second=simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);
+          simulations.first_sigma_2=simulation_first_sigma_2(oo_.dr.inv_order_var,2:simul_length_p1);
+          simulations.third=simulation_third(oo_.dr.inv_order_var,2:simul_length_p1);
           simulations.total=simulations.third+simulations.first_sigma_2...
                             +simulations.second+simulations.first+repmat(oo_.dr.ys,[1 simul_length]);
        end
@@ -219,52 +223,43 @@ global oo_
      % Den haan and de Wind's third order pruned solution  
        if strcmp(pruning_type,'den_haan_de_wind')
           E = shock_sequence;
-          simulation_first(:,1)=(oo_.dr.ghu+(1/2)*oo_.dr.ghuss)*E(:,1);
-          exe=alt_kron(E(:,1),E(:,1));
-          simulation_second(:,1)=(1/2)*oo_.dr.ghuu*exe;
-          simulation_third(:,1)=(1/2)*oo_.dr.ghuu*exe+(1/6)*oo_.dr.ghuuu*alt_kron(E(:,1),exe);
-          for t=2:simul_length
-              simulation_first(:,t)=(oo_.dr.ghx+(1/2)*oo_.dr.ghxss)*simulation_first(select_state,t-1)+(oo_.dr.ghu+(1/2)*oo_.dr.ghuss)*E(:,t);
-              exe=alt_kron(E(:,t),E(:,t));
-              sxe=alt_kron(simulation_first(select_state,t-1),E(:,t));
+          for t=2:simul_length_p1
+              simulation_first(:,t)=(oo_.dr.ghx+(1/2)*oo_.dr.ghxss)*simulation_first(select_state,t-1)+(oo_.dr.ghu+(1/2)*oo_.dr.ghuss)*E(:,t-1);
+              exe=alt_kron(E(:,t-1),E(:,t-1));
+              sxe=alt_kron(simulation_first(select_state,t-1),E(:,t-1));
               sxs=alt_kron(simulation_first(select_state,t-1),simulation_first(select_state,t-1));
               simulation_second(:,t)= (oo_.dr.ghx+(1/2)*oo_.dr.ghxss)*simulation_second(select_state,t-1)...
                                       +(1/2)*(oo_.dr.ghxx*sxs+2*oo_.dr.ghxu*sxe+oo_.dr.ghuu*exe);
-               simulation_third(:,t)=(oo_.dr.ghx+(1/2)*oo_.dr.ghxss)*simulation_third(select_state,t-1)+(oo_.dr.ghu+(1/2)*oo_.dr.ghuss)*E(:,t)...
-                                     +(1/2)*(oo_.dr.ghxx*alt_kron(simulation_second(select_state,t-1),simulation_second(select_state,t-1))+2*oo_.dr.ghxu*alt_kron(simulation_second(select_state,t-1),E(:,t))+oo_.dr.ghuu*exe)...
-                                     +(1/6)*(oo_.dr.ghxxx*alt_kron(simulation_first(select_state,t-1),sxs)+oo_.dr.ghuuu*alt_kron(E(:,t),exe))...
-                                     +(1/2)*(oo_.dr.ghxxu*alt_kron(sxs,E(:,t))+oo_.dr.ghxuu*alt_kron(simulation_first(select_state,t-1),exe));
+               simulation_third(:,t)=(oo_.dr.ghx+(1/2)*oo_.dr.ghxss)*simulation_third(select_state,t-1)+(oo_.dr.ghu+(1/2)*oo_.dr.ghuss)*E(:,t-1)...
+                                     +(1/2)*(oo_.dr.ghxx*alt_kron(simulation_second(select_state,t-1),simulation_second(select_state,t-1))+2*oo_.dr.ghxu*alt_kron(simulation_second(select_state,t-1),E(:,t-1))+oo_.dr.ghuu*exe)...
+                                     +(1/6)*(oo_.dr.ghxxx*alt_kron(simulation_first(select_state,t-1),sxs)+oo_.dr.ghuuu*alt_kron(E(:,t-1),exe))...
+                                     +(1/2)*(oo_.dr.ghxxu*alt_kron(sxs,E(:,t-1))+oo_.dr.ghxuu*alt_kron(simulation_first(select_state,t-1),exe));
           end
-          simulations.first=simulation_first(oo_.dr.inv_order_var,:);
-          simulations.second=simulation_second(oo_.dr.inv_order_var,:);
-          simulations.third=simulation_third(oo_.dr.inv_order_var,:);
+          simulations.first=simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
+          simulations.second=simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);
+          simulations.third=simulation_third(oo_.dr.inv_order_var,2:simul_length_p1);
           simulations.total=simulations.third+repmat(oo_.dr.ys+(1/2)*oo_.dr.ghs2(oo_.dr.inv_order_var),[1 simul_length]);
        end
        
      % Fernandez-villaverde et al's third order pruned solution
        if strcmp(pruning_type,'fernandez-villaverde_et_al')
           E = shock_sequence;
-          simulation_first(:,1)=oo_.dr.ghu*E(:,1);
-          exe=alt_kron(E(:,1),E(:,1));
-          simulation_second(:,1)=(1/2)*(oo_.dr.ghuu*exe+oo_.dr.ghs2);
-          simulation_first_sigma_2(:,1)=(1/2)*(oo_.dr.ghuss*E(:,1));
-          simulation_third(:,1)=(1/6)*oo_.dr.ghuuu*alt_kron(E(:,1),exe);
-          for t=2:simul_length
-              simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t);
-              exe=alt_kron(E(:,t),E(:,t));
-              sxe=alt_kron(simulation_first(select_state,t-1),E(:,t));
+          for t=2:simul_length_p1
+              simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t-1);
+              exe=alt_kron(E(:,t-1),E(:,t-1));
+              sxe=alt_kron(simulation_first(select_state,t-1),E(:,t-1));
               sxs=alt_kron(simulation_first(select_state,t-1),simulation_first(select_state,t-1));
               simulation_second(:,t)= oo_.dr.ghx*simulation_second(select_state,t-1)...
                                       +(1/2)*(oo_.dr.ghxx*sxs+2*oo_.dr.ghxu*sxe+oo_.dr.ghuu*exe+oo_.dr.ghs2);
-              simulation_first_sigma_2(:,t)=oo_.dr.ghx*simulation_first_sigma_2(select_state,t-1)+(1/2)*(oo_.dr.ghxss*simulation_first(select_state,t-1)+oo_.dr.ghuss*E(:,t));
+              simulation_first_sigma_2(:,t)=oo_.dr.ghx*simulation_first_sigma_2(select_state,t-1)+(1/2)*(oo_.dr.ghxss*simulation_first(select_state,t-1)+oo_.dr.ghuss*E(:,t-1));
               simulation_third(:,t)= oo_.dr.ghx*simulation_third(select_state,t-1)...
-                                     +(1/6)*(oo_.dr.ghxxx*alt_kron(simulation_first(select_state,t-1),sxs)+oo_.dr.ghuuu*alt_kron(E(:,t),exe))...
-                                     +(1/2)*(oo_.dr.ghxxu*alt_kron(sxs,E(:,t))+oo_.dr.ghxuu*alt_kron(simulation_first(select_state,t-1),exe));
+                                     +(1/6)*(oo_.dr.ghxxx*alt_kron(simulation_first(select_state,t-1),sxs)+oo_.dr.ghuuu*alt_kron(E(:,t-1),exe))...
+                                     +(1/2)*(oo_.dr.ghxxu*alt_kron(sxs,E(:,t-1))+oo_.dr.ghxuu*alt_kron(simulation_first(select_state,t-1),exe));
           end
-          simulations.first=simulation_first(oo_.dr.inv_order_var,:);
-          simulations.second=simulation_second(oo_.dr.inv_order_var,:);
-          simulations.first_sigma_2=simulation_first_sigma_2(oo_.dr.inv_order_var,:);
-          simulations.third=simulation_third(oo_.dr.inv_order_var,:);
+          simulations.first=simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
+          simulations.second=simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);
+          simulations.first_sigma_2=simulation_first_sigma_2(oo_.dr.inv_order_var,2:simul_length_p1);
+          simulations.third=simulation_third(oo_.dr.inv_order_var,2:simul_length_p1);
           simulations.total=simulations.third+simulations.first_sigma_2+simulations.second+simulations.first+repmat(oo_.dr.ys,[1 simul_length]);
        end
       
@@ -287,40 +282,27 @@ global oo_
            oo_.dr.ghxss_nlma = ghxss_nlma;
          % Simulation
            E = shock_sequence;
-           simulation_first(:,1) = oo_.dr.ghu*E(:,1);
-           exe = alt_kron(E(:,1),E(:,1));
-           simulation_second(:,1) = (1/2)*oo_.dr.ghuu*exe;      
-           simulation_third = (1/6)*oo_.dr.ghuuu*alt_kron(E(:,1),exe);      
-           simulation_first_sigma_2(:,1) = (1/2)*(ghuss_nlma*E(:,1));
-           for t = 2:simul_length
-               simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t);
-               exe = alt_kron(E(:,t),E(:,t));
-               sxe = alt_kron(simulation_first(select_state,t-1),E(:,t));
+           for t = 2:simul_length_p1
+               simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t-1);
+               exe = alt_kron(E(:,t-1),E(:,t-1));
+               sxe = alt_kron(simulation_first(select_state,t-1),E(:,t-1));
                sxs = alt_kron(simulation_first(select_state,t-1),simulation_first(select_state,t-1));
                simulation_second(:,t) = oo_.dr.ghx*simulation_second(select_state,t-1)...
                                         +(1/2)*( oo_.dr.ghxx*sxs+2*oo_.dr.ghxu*sxe+oo_.dr.ghuu*exe );
                simulation_first_sigma_2(:,t) = oo_.dr.ghx*simulation_first_sigma_2(select_state,t-1)...
-                                              +(1/2)*(ghuss_nlma*E(:,t)+ghxss_nlma*simulation_first(select_state,t-1));
+                                              +(1/2)*(ghuss_nlma*E(:,t-1)+ghxss_nlma*simulation_first(select_state,t-1));
                simulation_third(:,t) = oo_.dr.ghx*simulation_third(select_state,t-1)...
-                                       +(1/6)*(oo_.dr.ghxxx*alt_kron(simulation_first(select_state,t-1),sxs)+oo_.dr.ghuuu*alt_kron(E(:,t),exe))...
-                                       +(1/2)*(oo_.dr.ghxxu*alt_kron(sxs,E(:,t))+oo_.dr.ghxuu*alt_kron(simulation_first(select_state,t-1),exe))...
+                                       +(1/6)*(oo_.dr.ghxxx*alt_kron(simulation_first(select_state,t-1),sxs)+oo_.dr.ghuuu*alt_kron(E(:,t-1),exe))...
+                                       +(1/2)*(oo_.dr.ghxxu*alt_kron(sxs,E(:,t-1))+oo_.dr.ghxuu*alt_kron(simulation_first(select_state,t-1),exe))...
                                        +oo_.dr.ghxx*alt_kron(simulation_second(select_state,t-1),simulation_first(select_state,t-1))...
-                                       +oo_.dr.ghxu*alt_kron(simulation_second(select_state,t-1),E(:,t));
+                                       +oo_.dr.ghxu*alt_kron(simulation_second(select_state,t-1),E(:,t-1));
            end
-           simulations.first = simulation_first(oo_.dr.inv_order_var,:);
-           simulations.second = simulation_second(oo_.dr.inv_order_var,:);      
-           simulations.first_sigma_2 = simulation_first_sigma_2(oo_.dr.inv_order_var,:);
-           simulations.third = simulation_third(oo_.dr.inv_order_var,:);
+           simulations.first = simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
+           simulations.second = simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);      
+           simulations.first_sigma_2 = simulation_first_sigma_2(oo_.dr.inv_order_var,2:simul_length_p1);
+           simulations.third = simulation_third(oo_.dr.inv_order_var,2:simul_length_p1);
            simulations.total = simulations.third +simulations.first_sigma_2 + simulations.second + simulations.first...
                                +repmat( oo_.dr.ys + 0.5*ghs2_nlma(oo_.dr.inv_order_var,:),[1 simul_length] );
       end
       
   end
-
-
-
-
-
-
-
-
