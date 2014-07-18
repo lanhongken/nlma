@@ -106,7 +106,7 @@ global oo_
     
      % Kim et al's second order pruned solution
        if strcmp(pruning_type,'kim_et_al')
-          E=oo_.exo_simul';
+          E = shock_sequence;
           simulation_first(:,1)=oo_.dr.ghu*E(:,1);
           exe=alt_kron(E(:,1),E(:,1));
           simulation_second(:,1)=(1/2)*(oo_.dr.ghuu*exe+oo_.dr.ghs2);
@@ -125,7 +125,7 @@ global oo_
     
      % Den haan and de Wind's second order pruned solution
        if strcmp(pruning_type,'den_haan_de_wind')
-          E=oo_.exo_simul';
+          E = shock_sequence;
           simulation_first(:,1)=oo_.dr.ghu*E(:,1);
           exe = alt_kron(E(:,1),E(:,1));
           simulation_second(:,1)=(1/2)*oo_.dr.ghuu*exe;
@@ -189,7 +189,7 @@ global oo_
      
      % Andreasen's third order pruned solution
        if strcmp(pruning_type,'andreasen')
-          E=oo_.exo_simul';
+          E = shock_sequence;
           simulation_first(:,1)=oo_.dr.ghu*E(:,1);
           exe=alt_kron(E(:,1),E(:,1));
           simulation_second(:,1)=(1/2)*(oo_.dr.ghuu*exe+oo_.dr.ghs2);
@@ -218,7 +218,7 @@ global oo_
       
      % Den haan and de Wind's third order pruned solution  
        if strcmp(pruning_type,'den_haan_de_wind')
-          E=oo_.exo_simul';
+          E = shock_sequence;
           simulation_first(:,1)=(oo_.dr.ghu+(1/2)*oo_.dr.ghuss)*E(:,1);
           exe=alt_kron(E(:,1),E(:,1));
           simulation_second(:,1)=(1/2)*oo_.dr.ghuu*exe;
@@ -243,7 +243,7 @@ global oo_
        
      % Fernandez-villaverde et al's third order pruned solution
        if strcmp(pruning_type,'fernandez-villaverde_et_al')
-          E=oo_.exo_simul';
+          E = shock_sequence;
           simulation_first(:,1)=oo_.dr.ghu*E(:,1);
           exe=alt_kron(E(:,1),E(:,1));
           simulation_second(:,1)=(1/2)*(oo_.dr.ghuu*exe+oo_.dr.ghs2);
