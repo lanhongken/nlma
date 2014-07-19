@@ -1,4 +1,4 @@
-function simulations = pruning_abounds( M_, options_, shock_sequence, simul_length, pruning_order, pruning_type, initial_state )
+function simulations = pruning_abounds( M_, options_, shock_sequence, simul_length, pruning_order, pruning_type, use_cached_nlma_values, initial_state )
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % pruning_abounds.m
@@ -98,7 +98,10 @@ global oo_
         end
     end
     
-    if nargin >= 7
+    if nargin < 7
+        use_cached_nlma_values = 0;
+    end
+    if nargin >= 8
         simulation_first( :, 1 ) = initial_state.first( oo_.dr.order_var );
         if pruning_order >= 2
             simulation_second( :, 1 ) = initial_state.second( oo_.dr.order_var );
@@ -160,14 +163,18 @@ global oo_
       
      % Lan and Meyer-gohde's second order solution
        if strcmp(pruning_type, 'lan_meyer-gohde')
-          % Compute nlma's y_sigma^2
-            ghs2_state_nlma = (eye(nspred)-oo_.dr.ghx(nstatic+1:nstatic+nspred,:))\(oo_.dr.ghs2(nstatic+1:nstatic+nspred,:));
-            ghs2_nlma = [ oo_.dr.ghx(1:nstatic,:)*ghs2_state_nlma+oo_.dr.ghs2(1:nstatic,:)
-                          ghs2_state_nlma
-                          oo_.dr.ghx(nstatic+nspred+1:M_.endo_nbr,:)*ghs2_state_nlma+oo_.dr.ghs2(nstatic+nspred+1:M_.endo_nbr,:)]; 
-          % Save results
-            oo_.dr.ghs2_state_nlma = ghs2_state_nlma;
-            oo_.dr.ghs2_nlma = ghs2_nlma;
+            if use_cached_nlma_values
+                ghs2_nlma = oo_.dr.ghs2_nlma;
+            else
+              % Compute nlma's y_sigma^2
+                ghs2_state_nlma = (eye(nspred)-oo_.dr.ghx(nstatic+1:nstatic+nspred,:))\(oo_.dr.ghs2(nstatic+1:nstatic+nspred,:));
+                ghs2_nlma = [ oo_.dr.ghx(1:nstatic,:)*ghs2_state_nlma+oo_.dr.ghs2(1:nstatic,:)
+                              ghs2_state_nlma
+                              oo_.dr.ghx(nstatic+nspred+1:M_.endo_nbr,:)*ghs2_state_nlma+oo_.dr.ghs2(nstatic+nspred+1:M_.endo_nbr,:)]; 
+              % Save results
+                oo_.dr.ghs2_state_nlma = ghs2_state_nlma;
+                oo_.dr.ghs2_nlma = ghs2_nlma;
+            end
           % Simulation
             E = shock_sequence;
             for t = 2:simul_length_p1
@@ -265,21 +272,27 @@ global oo_
       
     % Lan and Meyer-Gohde's third order solution   
       if strcmp(pruning_type, 'lan_meyer-gohde')
-         % Compute nlma's y_sigma^2
-           ghs2_state_nlma = (eye(nspred)-oo_.dr.ghx(nstatic+1:nstatic+nspred,:))\(oo_.dr.ghs2(nstatic+1:nstatic+nspred,:));
-           ghs2_nlma = [ oo_.dr.ghx(1:nstatic,:)*ghs2_state_nlma+oo_.dr.ghs2(1:nstatic,:)
-                         ghs2_state_nlma
-                         oo_.dr.ghx(nstatic+nspred+1:M_.endo_nbr,:)*ghs2_state_nlma+oo_.dr.ghs2(nstatic+nspred+1:M_.endo_nbr,:)]; 
-         % Compute nlma's y_sigma^2e and y_sigma^2y^state
-           % y_sigma^2e           
-             ghuss_nlma = oo_.dr.ghuss + oo_.dr.ghxu*alt_kron(ghs2_state_nlma,eye(M_.exo_nbr));
-           % y_sigma^2y^state
-             ghxss_nlma = oo_.dr.ghxss + oo_.dr.ghxx*alt_kron(ghs2_state_nlma,eye(nspred));
-         % Save results
-           oo_.dr.ghs2_state_nlma = ghs2_state_nlma;
-           oo_.dr.ghs2_nlma = ghs2_nlma;
-           oo_.dr.ghuss_nlma = ghuss_nlma;
-           oo_.dr.ghxss_nlma = ghxss_nlma;
+           if use_cached_nlma_values
+               ghs2_nlma = oo_.dr.ghs2_nlma;
+               ghuss_nlma = oo_.dr.ghuss_nlma;
+               ghxss_nlma = oo_.dr.ghxss_nlma;
+           else
+             % Compute nlma's y_sigma^2
+               ghs2_state_nlma = (eye(nspred)-oo_.dr.ghx(nstatic+1:nstatic+nspred,:))\(oo_.dr.ghs2(nstatic+1:nstatic+nspred,:));
+               ghs2_nlma = [ oo_.dr.ghx(1:nstatic,:)*ghs2_state_nlma+oo_.dr.ghs2(1:nstatic,:)
+                             ghs2_state_nlma
+                             oo_.dr.ghx(nstatic+nspred+1:M_.endo_nbr,:)*ghs2_state_nlma+oo_.dr.ghs2(nstatic+nspred+1:M_.endo_nbr,:)]; 
+             % Compute nlma's y_sigma^2e and y_sigma^2y^state
+               % y_sigma^2e           
+                 ghuss_nlma = oo_.dr.ghuss + oo_.dr.ghxu*alt_kron(ghs2_state_nlma,eye(M_.exo_nbr));
+               % y_sigma^2y^state
+                 ghxss_nlma = oo_.dr.ghxss + oo_.dr.ghxx*alt_kron(ghs2_state_nlma,eye(nspred));
+             % Save results
+               oo_.dr.ghs2_state_nlma = ghs2_state_nlma;
+               oo_.dr.ghs2_nlma = ghs2_nlma;
+               oo_.dr.ghuss_nlma = ghuss_nlma;
+               oo_.dr.ghxss_nlma = ghxss_nlma;
+           end
          % Simulation
            E = shock_sequence;
            for t = 2:simul_length_p1
