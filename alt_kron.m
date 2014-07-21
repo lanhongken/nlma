@@ -50,8 +50,8 @@ function X = alt_kron(A,B)
 %ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 %POSSIBILITY OF SUCH DAMAGE.
 
-[I J] = size(A);
-[K L] = size(B);
+[I, J] = size(A);
+[K, L] = size(B);
 
 if ~issparse(A) && ~issparse(B)
     
@@ -73,8 +73,8 @@ else
         X = sparse(ix,jx,bsxfun(@and,sb(:),sa(:).'),I*K,J*L);
     else
 
-          temp=double(sb(:))*double(sa(:).');
-        X = sparse(ix,jx,double(sb(:))*double(sa(:).'),I*K,J*L);
+        temp=double(sb(:))*double(sa(:).');
+        X = sparse(ix,jx,temp,I*K,J*L);
     end
     
 end
