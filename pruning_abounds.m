@@ -121,7 +121,8 @@ global oo_
       simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t-1);
     end
     simulations.first=simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
-    simulations.total=simulations.first+repmat(oo_.dr.ys,[1 simul_length]);    
+    simulations.constant=oo_.dr.ys;
+    simulations.total=simulations.first+repmat(simulations.constant,[1 simul_length]);    
   end
 
 %--------------------------------------------------------------------------
@@ -142,7 +143,8 @@ global oo_
           end
           simulations.first=simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
           simulations.second=simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);
-          simulations.total=simulations.second+simulations.first+repmat(oo_.dr.ys,[1 simul_length]);
+          simulations.constant=oo_.dr.ys;
+          simulations.total=simulations.second+simulations.first+repmat(simulations.constant,[1 simul_length]);
        end
     
      % Den haan and de Wind's second order pruned solution
@@ -158,7 +160,8 @@ global oo_
           end
           simulations.first=simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
           simulations.second=simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);
-          simulations.total=simulations.second+simulations.first+repmat(oo_.dr.ys+(1/2)*oo_.dr.ghs2(oo_.dr.inv_order_var),[1 simul_length]);
+          simulations.constant=oo_.dr.ys+(1/2)*oo_.dr.ghs2(oo_.dr.inv_order_var);
+          simulations.total=simulations.second+simulations.first+repmat(simulations.constant,[1 simul_length]);
        end
       
      % Lan and Meyer-gohde's second order solution
@@ -187,8 +190,9 @@ global oo_
             end
             simulations.first = simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
             simulations.second = simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);
+            simulations.constant = oo_.dr.ys + 0.5*ghs2_nlma(oo_.dr.inv_order_var,:);
             simulations.total = simulations.second + simulations.first...
-                                 +repmat( oo_.dr.ys + 0.5*ghs2_nlma(oo_.dr.inv_order_var,:),[1 simul_length] );
+                                 +repmat( simulations.constant,[1 simul_length] );
        end
   end
 
@@ -223,8 +227,9 @@ global oo_
           simulations.second=simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);
           simulations.first_sigma_2=simulation_first_sigma_2(oo_.dr.inv_order_var,2:simul_length_p1);
           simulations.third=simulation_third(oo_.dr.inv_order_var,2:simul_length_p1);
+          simulations.constant=oo_.dr.ys;
           simulations.total=simulations.third+simulations.first_sigma_2...
-                            +simulations.second+simulations.first+repmat(oo_.dr.ys,[1 simul_length]);
+                            +simulations.second+simulations.first+repmat(simulations.constant,[1 simul_length]);
        end
       
      % Den haan and de Wind's third order pruned solution  
@@ -245,7 +250,8 @@ global oo_
           simulations.first=simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
           simulations.second=simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);
           simulations.third=simulation_third(oo_.dr.inv_order_var,2:simul_length_p1);
-          simulations.total=simulations.third+repmat(oo_.dr.ys+(1/2)*oo_.dr.ghs2(oo_.dr.inv_order_var),[1 simul_length]);
+          simulations.constant=oo_.dr.ys+(1/2)*oo_.dr.ghs2(oo_.dr.inv_order_var);
+          simulations.total=simulations.third+repmat(simulations.constant,[1 simul_length]);
        end
        
      % Fernandez-villaverde et al's third order pruned solution
@@ -267,7 +273,8 @@ global oo_
           simulations.second=simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);
           simulations.first_sigma_2=simulation_first_sigma_2(oo_.dr.inv_order_var,2:simul_length_p1);
           simulations.third=simulation_third(oo_.dr.inv_order_var,2:simul_length_p1);
-          simulations.total=simulations.third+simulations.first_sigma_2+simulations.second+simulations.first+repmat(oo_.dr.ys,[1 simul_length]);
+          simulations.constant=oo_.dr.ys;
+          simulations.total=simulations.third+simulations.first_sigma_2+simulations.second+simulations.first+repmat(simulations.constant,[1 simul_length]);
        end
       
     % Lan and Meyer-Gohde's third order solution   
@@ -314,8 +321,9 @@ global oo_
            simulations.second = simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);      
            simulations.first_sigma_2 = simulation_first_sigma_2(oo_.dr.inv_order_var,2:simul_length_p1);
            simulations.third = simulation_third(oo_.dr.inv_order_var,2:simul_length_p1);
+           simulations.consant = oo_.dr.ys + 0.5*ghs2_nlma(oo_.dr.inv_order_var,:);
            simulations.total = simulations.third +simulations.first_sigma_2 + simulations.second + simulations.first...
-                               +repmat( oo_.dr.ys + 0.5*ghs2_nlma(oo_.dr.inv_order_var,:),[1 simul_length] );
+                               +repmat( simulations.consant,[1 simul_length] );
       end
       
   end
