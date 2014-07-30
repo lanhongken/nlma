@@ -321,7 +321,7 @@ global oo_
            simulations.second = simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);      
            simulations.first_sigma_2 = simulation_first_sigma_2(oo_.dr.inv_order_var,2:simul_length_p1);
            simulations.third = simulation_third(oo_.dr.inv_order_var,2:simul_length_p1);
-           simulations.consant = oo_.dr.ys + 0.5*ghs2_nlma(oo_.dr.inv_order_var,:);
+           simulations.constant = oo_.dr.ys + 0.5*ghs2_nlma(oo_.dr.inv_order_var,:);
            simulations.total = simulations.third +simulations.first_sigma_2 + simulations.second + simulations.first...
                                +repmat( simulations.consant,[1 simul_length] );
       end
