@@ -323,7 +323,7 @@ global oo_
            simulations.third = simulation_third(oo_.dr.inv_order_var,2:simul_length_p1);
            simulations.constant = oo_.dr.ys + 0.5*ghs2_nlma(oo_.dr.inv_order_var,:);
            simulations.total = simulations.third +simulations.first_sigma_2 + simulations.second + simulations.first...
-                               +repmat( simulations.consant,[1 simul_length] );
+                               +repmat( simulations.constant,[1 simul_length] );
       end
       
   end
