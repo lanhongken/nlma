@@ -88,16 +88,7 @@ global oo_
 %--------------------------------------------------------------------------
     
     simul_length_p1 = simul_length + 1;
-    
-    simulation_first = zeros(M_.endo_nbr,simul_length_p1);
-    if pruning_order >= 2
-        simulation_second = zeros(M_.endo_nbr,simul_length_p1);
-        if pruning_order >= 3
-            simulation_third = zeros(M_.endo_nbr,simul_length_p1);
-            simulation_first_sigma_2 = zeros(M_.endo_nbr,simul_length_p1);
-        end
-    end
-    
+        
     if nargin < 7
         use_cached_nlma_values = 0;
     end
@@ -108,6 +99,15 @@ global oo_
             if pruning_order >= 3
                 simulation_third( :, 1 ) = initial_state.third( oo_.dr.order_var );
                 simulation_first_sigma_2( :, 1 ) = initial_state.first_sigma_2( oo_.dr.order_var );
+            end
+        end
+    else
+        simulation_first = zeros(M_.endo_nbr,simul_length_p1);
+        if pruning_order >= 2
+            simulation_second = zeros(M_.endo_nbr,simul_length_p1);
+            if pruning_order >= 3
+                simulation_third = zeros(M_.endo_nbr,simul_length_p1);
+                simulation_first_sigma_2 = zeros(M_.endo_nbr,simul_length_p1);
             end
         end
     end
