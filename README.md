@@ -1,4 +1,4 @@
-Nonlinear Movering Average (nlma) Software
+Nonlinear Moving Average (nlma) Software
 ------------------------------------------
 
 <a href="mailto:lanhongken@gmail.com">Hong Lan</a> 
