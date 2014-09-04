@@ -170,7 +170,7 @@ Indeed, this version directly recovers nlma coefficients from Dynare's solution,
 
 - Early version of nlma software has two parts, the solution part and moments calculation part. The solution part computes nlma policy rules, impulse responses and simulations and can be downloaded [here](http://ideas.repec.org/c/dge/qmrbcd/192.html). The moments calculation part computes nlma theoretical moments and can be downloaded [here](http://ideas.repec.org/c/dge/qmrbcd/197.html).
 
-- [Lan and Meyer-Gohde (2013a)](http://www.sciencedirect.com/science/article/pii/S0165188913001462) provides theoretical foundations and derivations of the nonlinear movering average approximation.
+- [Lan and Meyer-Gohde (2013a)](http://www.sciencedirect.com/science/article/pii/S0165188913001462) provides theoretical foundations and derivations of the nonlinear moving average approximation.
 
 - [Lan and Meyer-Gohde (2013b)](http://ideas.repec.org/p/hum/wpaper/sfb649dp2013-024.html) provides the recurssive representation of nlma policy rule, and compares nlma with several other pruning algorithms.
 
