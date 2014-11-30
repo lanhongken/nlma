@@ -1,4 +1,4 @@
-function simulations = pruning_abounds( M_, options_, shock_sequence, simul_length, pruning_order, pruning_type, use_cached_nlma_values, initial_state )
+function simulations = pruning_abounds( M_, options_, shock_sequence, simul_length, pruning_order, pruning_type, use_cached_nlma_values, initial_state, call_back, call_back_arg )
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % pruning_abounds.m
@@ -119,6 +119,9 @@ global oo_
     E = shock_sequence;
     for t=2:simul_length_p1
       simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t-1);
+       if nargin >= 10
+          call_back(call_back_arg);
+       end
     end
     simulations.first=simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
     simulations.constant=oo_.dr.ys;
@@ -140,6 +143,9 @@ global oo_
                sxs=alt_kron(simulation_first(select_state,t-1),simulation_first(select_state,t-1));
                simulation_second(:,t)= oo_.dr.ghx*simulation_second(select_state,t-1)...
                                        +(1/2)*(oo_.dr.ghxx*sxs+2*oo_.dr.ghxu*sxe+oo_.dr.ghuu*exe+oo_.dr.ghs2);
+               if nargin >= 9
+                  call_back(call_back_arg);
+               end
           end
           simulations.first=simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
           simulations.second=simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);
@@ -157,6 +163,9 @@ global oo_
                sxs=alt_kron(simulation_first(select_state,t-1),simulation_first(select_state,t-1));
                simulation_second(:,t)= oo_.dr.ghx*simulation_second(select_state,t-1)...
                                        +(1/2)*(oo_.dr.ghxx*sxs+2*oo_.dr.ghxu*sxe+oo_.dr.ghuu*exe);
+               if nargin >= 9
+                  call_back(call_back_arg);
+               end
           end
           simulations.first=simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
           simulations.second=simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);
@@ -187,6 +196,9 @@ global oo_
                 sxs = alt_kron(simulation_first(select_state,t-1),simulation_first(select_state,t-1));
                 simulation_second(:,t) = oo_.dr.ghx*simulation_second(select_state,t-1)...
                                          +(1/2)*( oo_.dr.ghxx*sxs+2*oo_.dr.ghxu*sxe+oo_.dr.ghuu*exe );
+               if nargin >= 9
+                  call_back(call_back_arg);
+               end
             end
             simulations.first = simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
             simulations.second = simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);
@@ -222,6 +234,9 @@ global oo_
                                      +(1/6)*(oo_.dr.ghxxx*alt_kron(simulation_first(select_state,t-1),sxs)+oo_.dr.ghuuu*alt_kron(E(:,t-1),exe))...
                                      +(1/2)*(oo_.dr.ghxxu*alt_kron(sxs,E(:,t-1))+oo_.dr.ghxuu*alt_kron(simulation_first(select_state,t-1),exe))...
                                      +oo_.dr.ghxx*alt_kron(simulation_second(select_state,t-1),simulation_first(select_state,t-1))+oo_.dr.ghxu*alt_kron(simulation_second(select_state,t-1),E(:,t-1));
+               if nargin >= 9
+                  call_back(call_back_arg);
+               end
           end
           simulations.first=simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
           simulations.second=simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);
@@ -246,6 +261,9 @@ global oo_
                                      +(1/2)*(oo_.dr.ghxx*alt_kron(simulation_second(select_state,t-1),simulation_second(select_state,t-1))+2*oo_.dr.ghxu*alt_kron(simulation_second(select_state,t-1),E(:,t-1))+oo_.dr.ghuu*exe)...
                                      +(1/6)*(oo_.dr.ghxxx*alt_kron(simulation_first(select_state,t-1),sxs)+oo_.dr.ghuuu*alt_kron(E(:,t-1),exe))...
                                      +(1/2)*(oo_.dr.ghxxu*alt_kron(sxs,E(:,t-1))+oo_.dr.ghxuu*alt_kron(simulation_first(select_state,t-1),exe));
+               if nargin >= 9
+                  call_back(call_back_arg);
+               end
           end
           simulations.first=simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
           simulations.second=simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);
@@ -268,6 +286,9 @@ global oo_
               simulation_third(:,t)= oo_.dr.ghx*simulation_third(select_state,t-1)...
                                      +(1/6)*(oo_.dr.ghxxx*alt_kron(simulation_first(select_state,t-1),sxs)+oo_.dr.ghuuu*alt_kron(E(:,t-1),exe))...
                                      +(1/2)*(oo_.dr.ghxxu*alt_kron(sxs,E(:,t-1))+oo_.dr.ghxuu*alt_kron(simulation_first(select_state,t-1),exe));
+               if nargin >= 9
+                  call_back(call_back_arg);
+               end
           end
           simulations.first=simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
           simulations.second=simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);
@@ -316,6 +337,9 @@ global oo_
                                        +(1/2)*(oo_.dr.ghxxu*alt_kron(sxs,E(:,t-1))+oo_.dr.ghxuu*alt_kron(simulation_first(select_state,t-1),exe))...
                                        +oo_.dr.ghxx*alt_kron(simulation_second(select_state,t-1),simulation_first(select_state,t-1))...
                                        +oo_.dr.ghxu*alt_kron(simulation_second(select_state,t-1),E(:,t-1));
+               if nargin >= 9
+                  call_back(call_back_arg);
+               end
            end
            simulations.first = simulation_first(oo_.dr.inv_order_var,2:simul_length_p1);
            simulations.second = simulation_second(oo_.dr.inv_order_var,2:simul_length_p1);      
