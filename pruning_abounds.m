@@ -25,7 +25,7 @@ function simulations = pruning_abounds( M_, options_, shock_sequence, simul_leng
 %'lan_meyer-gohde' : The second order algorithm of LAN, H., AND A. 
 %                    MEYER-GOHDE(2013): “Solving DSGE Models with a 
 %                    Nonlinear Moving Average", Journal of Economic 
-%                    Dynamics and Control, 37(12), 2643 ? 2667.
+%                    Dynamics and Control, 37(12), 2643-2667.
 %
 %
 % For third order approximations (options_.order=3 in Dynare)
@@ -135,11 +135,15 @@ global oo_
     
      % Kim et al's second order pruned solution
        if strcmp(pruning_type,'kim_et_al')
-          E = shock_sequence;
-          for t=2:simul_length_p1
-               simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t-1);
-               exe=alt_kron(E(:,t-1),E(:,t-1));
-               sxe=alt_kron(simulation_first(select_state,t-1),E(:,t-1));
+          %E=oo_.exo_simul';
+          E = shock_sequence; % -> HL, Sept 01, 2014, in nlma_simul.m, shock_sequence is oo_.exo_simul' by default.
+          simulation_first(:,1)=oo_.dr.ghu*E(:,1);
+          exe=alt_kron(E(:,1),E(:,1));
+          simulation_second(:,1)=(1/2)*(oo_.dr.ghuu*exe+oo_.dr.ghs2);
+          for t=2:simul_length
+               simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t);
+               exe=alt_kron(E(:,t),E(:,t));
+               sxe=alt_kron(simulation_first(select_state,t-1),E(:,t));
                sxs=alt_kron(simulation_first(select_state,t-1),simulation_first(select_state,t-1));
                simulation_second(:,t)= oo_.dr.ghx*simulation_second(select_state,t-1)...
                                        +(1/2)*(oo_.dr.ghxx*sxs+2*oo_.dr.ghxu*sxe+oo_.dr.ghuu*exe+oo_.dr.ghs2);
@@ -155,11 +159,15 @@ global oo_
     
      % Den haan and de Wind's second order pruned solution
        if strcmp(pruning_type,'den_haan_de_wind')
-          E = shock_sequence;
-          for t=2:simul_length_p1
-               simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t-1);
-               exe=alt_kron(E(:,t-1),E(:,t-1));
-               sxe=alt_kron(simulation_first(select_state,t-1),E(:,t-1));
+          %E=oo_.exo_simul';
+          E = shock_sequence; % -> HL, Sept 01, 2014
+          simulation_first(:,1)=oo_.dr.ghu*E(:,1);
+          exe = alt_kron(E(:,1),E(:,1));
+          simulation_second(:,1)=(1/2)*oo_.dr.ghuu*exe;
+          for t=2:simul_length
+               simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t);
+               exe=alt_kron(E(:,t),E(:,t));
+               sxe=alt_kron(simulation_first(select_state,t-1),E(:,t));
                sxs=alt_kron(simulation_first(select_state,t-1),simulation_first(select_state,t-1));
                simulation_second(:,t)= oo_.dr.ghx*simulation_second(select_state,t-1)...
                                        +(1/2)*(oo_.dr.ghxx*sxs+2*oo_.dr.ghxu*sxe+oo_.dr.ghuu*exe);
@@ -221,11 +229,17 @@ global oo_
      
      % Andreasen's third order pruned solution
        if strcmp(pruning_type,'andreasen')
-          E = shock_sequence;
-          for t=2:simul_length_p1
-              simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t-1);
-              exe=alt_kron(E(:,t-1),E(:,t-1));
-              sxe=alt_kron(simulation_first(select_state,t-1),E(:,t-1));
+          %E=oo_.exo_simul';
+          E = shock_sequence; % -> HL, Sept 01, 2014
+          simulation_first(:,1)=oo_.dr.ghu*E(:,1);
+          exe=alt_kron(E(:,1),E(:,1));
+          simulation_second(:,1)=(1/2)*(oo_.dr.ghuu*exe+oo_.dr.ghs2);
+          simulation_first_sigma_2(:,1)=(1/2)*(oo_.dr.ghuss*E(:,1));
+          simulation_third(:,1)=(1/6)*oo_.dr.ghuuu*alt_kron(E(:,1),exe);
+          for t=2:simul_length
+              simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t);
+              exe=alt_kron(E(:,t),E(:,t));
+              sxe=alt_kron(simulation_first(select_state,t-1),E(:,t));
               sxs=alt_kron(simulation_first(select_state,t-1),simulation_first(select_state,t-1));
               simulation_second(:,t)= oo_.dr.ghx*simulation_second(select_state,t-1)...
                                       +(1/2)*(oo_.dr.ghxx*sxs+2*oo_.dr.ghxu*sxe+oo_.dr.ghuu*exe+oo_.dr.ghs2);
@@ -249,11 +263,16 @@ global oo_
       
      % Den haan and de Wind's third order pruned solution  
        if strcmp(pruning_type,'den_haan_de_wind')
-          E = shock_sequence;
-          for t=2:simul_length_p1
-              simulation_first(:,t)=(oo_.dr.ghx+(1/2)*oo_.dr.ghxss)*simulation_first(select_state,t-1)+(oo_.dr.ghu+(1/2)*oo_.dr.ghuss)*E(:,t-1);
-              exe=alt_kron(E(:,t-1),E(:,t-1));
-              sxe=alt_kron(simulation_first(select_state,t-1),E(:,t-1));
+          %E=oo_.exo_simul';
+          E = shock_sequence; % -> HL, Sept 01, 2014
+          simulation_first(:,1)=(oo_.dr.ghu+(1/2)*oo_.dr.ghuss)*E(:,1);
+          exe=alt_kron(E(:,1),E(:,1));
+          simulation_second(:,1)=(1/2)*oo_.dr.ghuu*exe;
+          simulation_third(:,1)=(1/2)*oo_.dr.ghuu*exe+(1/6)*oo_.dr.ghuuu*alt_kron(E(:,1),exe);
+          for t=2:simul_length
+              simulation_first(:,t)=(oo_.dr.ghx+(1/2)*oo_.dr.ghxss)*simulation_first(select_state,t-1)+(oo_.dr.ghu+(1/2)*oo_.dr.ghuss)*E(:,t);
+              exe=alt_kron(E(:,t),E(:,t));
+              sxe=alt_kron(simulation_first(select_state,t-1),E(:,t));
               sxs=alt_kron(simulation_first(select_state,t-1),simulation_first(select_state,t-1));
               simulation_second(:,t)= (oo_.dr.ghx+(1/2)*oo_.dr.ghxss)*simulation_second(select_state,t-1)...
                                       +(1/2)*(oo_.dr.ghxx*sxs+2*oo_.dr.ghxu*sxe+oo_.dr.ghuu*exe);
@@ -274,11 +293,17 @@ global oo_
        
      % Fernandez-villaverde et al's third order pruned solution
        if strcmp(pruning_type,'fernandez-villaverde_et_al')
-          E = shock_sequence;
-          for t=2:simul_length_p1
-              simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t-1);
-              exe=alt_kron(E(:,t-1),E(:,t-1));
-              sxe=alt_kron(simulation_first(select_state,t-1),E(:,t-1));
+          %E=oo_.exo_simul';
+          E = shock_sequence; % -> HL, Sept 01, 2014
+          simulation_first(:,1)=oo_.dr.ghu*E(:,1);
+          exe=alt_kron(E(:,1),E(:,1));
+          simulation_second(:,1)=(1/2)*(oo_.dr.ghuu*exe+oo_.dr.ghs2);
+          simulation_first_sigma_2(:,1)=(1/2)*(oo_.dr.ghuss*E(:,1));
+          simulation_third(:,1)=(1/6)*oo_.dr.ghuuu*alt_kron(E(:,1),exe);
+          for t=2:simul_length
+              simulation_first(:,t)=oo_.dr.ghx*simulation_first(select_state,t-1)+oo_.dr.ghu*E(:,t);
+              exe=alt_kron(E(:,t),E(:,t));
+              sxe=alt_kron(simulation_first(select_state,t-1),E(:,t));
               sxs=alt_kron(simulation_first(select_state,t-1),simulation_first(select_state,t-1));
               simulation_second(:,t)= oo_.dr.ghx*simulation_second(select_state,t-1)...
                                       +(1/2)*(oo_.dr.ghxx*sxs+2*oo_.dr.ghxu*sxe+oo_.dr.ghuu*exe+oo_.dr.ghs2);
