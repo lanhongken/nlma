@@ -32,11 +32,11 @@ if options_.order>=3 %make sure the solution is a third-order solution (otherwis
     exo_det_simul = [];
     [numeric_version] = return_dynare_version(dynare_version);
     if numeric_version<4.3 %Starting in Dynare 4.3.0, dr1 is removed. 
-        [oo_.dr,waste1,waste2,waste3,waste4] = dr1(oo_.dr,0,M_,options_,oo_);
+        [oo.dr,waste1,waste2,waste3,waste4] = dr1(oo_.dr,0,M_,options_,oo_);
     elseif numeric_version>=4.3 %replace with stochastic_solvers in 4.3
-        [oo_.dr,waste1] = stochastic_solvers(oo_.dr,0,M_,options_,oo_);   
+        [oo.dr,waste1] = stochastic_solvers(oo_.dr,0,M_,options_,oo_);   
     else
-        disp('Error, no certainty evuivalent dr calculated');
+        disp('Error, no certainty equivalent dr calculated');
     end;
     if numeric_version >= 4.4 % Starting in Dynare 4.4.0, the following fields are no longer in oo_.dr, they can be found in M_
         oo_.dr.nstatic = M_.nstatic;
@@ -44,6 +44,8 @@ if options_.order>=3 %make sure the solution is a third-order solution (otherwis
         oo_.dr.nboth = M_.nboth;
         oo_.dr.nfwrd = M_.nfwrd;
     end
+    oo_.dr.ghx=oo.dr.ghx;
+    oo_.dr.ghu=oo.dr.ghu;
     oo_.exo_simul = exo_simul;
     oo_.exo_det_simul = exo_det_simul;
     %[oo_.dr,~,~,~,~] = dr1(oo_.dr,0,M_,options_,oo_);
