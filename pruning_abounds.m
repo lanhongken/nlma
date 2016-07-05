@@ -29,7 +29,7 @@ function simulations = pruning_abounds( M_, options_, shock_sequence, simul_leng
 %					 algorithm of DEN HAAN, W. J., AND J.
 %                     DE WIND (2012): "Nonlinear and Stable Perturbation 
 %                     Based Approximations", Journal of Economic Dynamics 
-%                     and Control, 36(10), 1477?497.
+%                     and Control, 36(10), 1477-497.
 %
 %'lan_meyer-gohde_det' : The second order nonlinear moving average with
 %					 a deterministic past.
@@ -39,7 +39,7 @@ function simulations = pruning_abounds( M_, options_, shock_sequence, simul_leng
 %'andreasen' : The third order algorithm of ANDREASEN, M. M. (2012): "On 
 %              the Effects of Rare Disasters and Uncertainty Shocks for 
 %              Risk Premia in Non-Linear DSGE Models", Review of Economic 
-%              Dynamics, 15(3), 295?16. This algorithm
+%              Dynamics, 15(3), 295-316. This algorithm
 %				is identical to the series expansion at the determinisitic 
 %				steady state.
 %
@@ -47,7 +47,7 @@ function simulations = pruning_abounds( M_, options_, shock_sequence, simul_leng
 %               FERNANDEZ-VILLAVERDE, J., P. A. GUERRO N-QUINTANA, J. 
 %               RUBIO-RAMI REZ, AND M. URIBE (2011): "Risk Matters: The 
 %               Real Effects of Volatility Shocks", American Economic
-%               Review, 101(6), 2530?1.
+%               Review, 101(6), 2530-61.
 %
 %'den_haan_de_wind' : The third order algorithm of DEN HAAN, W. J., AND J.
 %                     DE WIND (2012): "Nonlinear and Stable Perturbation 
