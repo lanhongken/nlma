@@ -14,17 +14,17 @@ end
 [numeric_version] = return_dynare_version(dynare_version);
 assert( numeric_version >= 4.4 );
 
+nstatic = M.nstatic;
+nspred = M.nspred; % note M_.nspred = M_.npred+M_.nboth;
+% nboth = M_.nboth;
+nfwrd = M.nfwrd;
+
 if options.order>=3
     if options.pruning == 0
         oo = full_block_dr_new(oo,M,options);
     end
 end
 if options.order>=2
-    nstatic = M.nstatic;
-    nspred = M.nspred; % note M_.nspred = M_.npred+M_.nboth;
-    % nboth = M_.nboth;
-    nfwrd = M.nfwrd;
-    
     if isempty(options.qz_criterium)==1
         options.qz_criterium=1+1e-6;
     end
