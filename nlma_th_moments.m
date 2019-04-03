@@ -49,10 +49,15 @@ function moments = nlma_th_moments(M_,oo_,options_,var_list_)
   % they can be found in M_
     [ numeric_version ] = return_dynare_version( dynare_version );
     if numeric_version >= 4.4 
-        oo_.dr.nstatic = M_.nstatic;
-        oo_.dr.npred = M_.nspred; % note M_.nspred = M_.npred+M_.nboth;
-        oo_.dr.nboth = M_.nboth;
-        oo_.dr.nfwrd = M_.nfwrd;
+        nstatic = M_.nstatic;
+        nspred = M_.nspred; % note M_.nspred = M_.npred+M_.nboth;
+        nboth = M_.nboth;
+        nfwrd = M_.nfwrd;
+    else
+        nstatic = oo_.dr.nstatic;
+        nspred = oo_.dr.npred;
+        nboth = oo_.dr.nboth;
+        nfwrd = oo_.dr.nfwrd;
     end
     
   % Build observables selector
@@ -73,16 +78,16 @@ function moments = nlma_th_moments(M_,oo_,options_,var_list_)
     select_obs = oo_.dr.inv_order_var(select_obs); 
     
   % Build state variable selector
-    select_state = oo_.dr.nstatic + 1:oo_.dr.nstatic + oo_.dr.npred; 
+    select_state = nstatic + 1:nstatic + nspred; 
     
 %--------------------------------------------------------------------------
 % 2. Save results for nlma moments calculation of all orders
 %--------------------------------------------------------------------------
   % Save numbers of different type of variables
-    moments.nstatic = oo_.dr.nstatic;
-    moments.npred   = oo_.dr.npred;
-    moments.nboth   = oo_.dr.nboth;
-    moments.nfwrd   = oo_.dr.nfwrd;
+    moments.nstatic = nstatic;
+    moments.npred   = nspred;
+    moments.nboth   = nboth;
+    moments.nfwrd   = nfwrd;
     
   % Save variable selectors
     moments.select_state = select_state;
