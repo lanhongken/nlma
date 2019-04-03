@@ -61,8 +61,8 @@ if options_.order>=3 && options_.pruning == 0 %make sure the solution is a third
     for j=2:nspred+M_.exo_nbr
         a = tril(ones(nspred+M_.exo_nbr-j+1));
         i = find(a);
-        a(i) = [1:length(i)]+max(max(b));
-         b(:,(j-1)*(nspred+M_.exo_nbr)+1:j*(nspred+M_.exo_nbr))=[b(:,[1:(j-1)]*(nspred+M_.exo_nbr)-(nspred+M_.exo_nbr-j)),[zeros(j-1,nspred+M_.exo_nbr-j+1);a]];
+        a(i) = (1:length(i))+max(max(b));
+         b(:,(j-1)*(nspred+M_.exo_nbr)+1:j*(nspred+M_.exo_nbr))=[b(:,(1:(j-1))*(nspred+M_.exo_nbr)-(nspred+M_.exo_nbr-j)),[zeros(j-1,nspred+M_.exo_nbr-j+1);a]];
         b(:,(j-1)*(nspred+M_.exo_nbr)+1:j*(nspred+M_.exo_nbr))=tril(b(:,(j-1)*(nspred+M_.exo_nbr)+1:j*(nspred+M_.exo_nbr)));
         b(:,(j-1)*(nspred+M_.exo_nbr)+1:j*(nspred+M_.exo_nbr))=  b(:,(j-1)*(nspred+M_.exo_nbr)+1:j*(nspred+M_.exo_nbr))+ b(:,(j-1)*(nspred+M_.exo_nbr)+1:j*(nspred+M_.exo_nbr))'- diag(diag(b(:,(j-1)*(nspred+M_.exo_nbr)+1:j*(nspred+M_.exo_nbr))));
     end
