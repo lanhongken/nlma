@@ -20,8 +20,13 @@ if options.order>=3
     end
 end
 if options.order>=2
+    nstatic = M.nstatic;
+    nspred = M.nspred; % note M_.nspred = M_.npred+M_.nboth;
+    % nboth = M_.nboth;
+    nfwrd = M.nfwrd;
+    
     if isempty(options.qz_criterium)==1
-        options.qz_criterium=1.000001;
+        options.qz_criterium=1+1e-6;
     end
     state_var =  lyapunov_symm(oo.dr.ghx(nstatic+1:nstatic+nspred,:),oo.dr.ghu(nstatic+1:nstatic+nspred,:)*M.Sigma_e*oo.dr.ghu(nstatic+1:nstatic+nspred,:)',2-options.qz_criterium,1e-12,options.lyapunov_complex_threshold);
 end
