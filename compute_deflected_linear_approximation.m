@@ -1,6 +1,9 @@
-% By Alexander Meyer-Gohde. Slight modifications by Tom Holden
-
 function [deflect_]=compute_deflected_linear_approximation(M,options,oo,ModeRSS1OrMean2)
+
+% Copyright: Alexander Meyer-Gohde 2016, Tom Holden 2018 (only slight modifications from TH)
+
+% You are free to use/modify/redistribute this program so long as original authorship credit is given and you in no way impinge on its free distribution.
+% This software is provided as is with no guarantees of any kind.
 
 if ModeRSS1OrMean2 > 2
     disp('Incompatible mode')
@@ -9,17 +12,7 @@ if ModeRSS1OrMean2 > 2
 end
 
 [numeric_version] = return_dynare_version(dynare_version);
-if numeric_version >= 4.4 
-    nstatic = M.nstatic;
-    nspred = M.nspred; % note M_.nspred = M_.npred+M_.nboth;
-    % nboth = M_.nboth;
-    nfwrd = M.nfwrd;
-else
-    nstatic = oo.dr.nstatic;
-    nspred = oo.dr.npred;
-    % nboth = oo_.dr.nboth;
-    nfwrd = oo.dr.nfwrd;
-end
+assert( numeric_version >= 4.4 );
 
 if options.order>=3
     if options.pruning == 0
