@@ -29,7 +29,7 @@ if options_.order>=3 && options_.pruning == 0 %make sure the solution is a third
     exo_simul = oo_.exo_simul;
     oo_.exo_simul = zeros(M_.maximum_lag+2,M_.exo_nbr);% these two lines are needed to prevent dynare from using the simulation to evaluate the derivatives
     exo_det_simul = oo_.exo_det_simul;
-    exo_det_simul = [];
+    oo_.exo_det_simul = [];
     [numeric_version] = return_dynare_version(dynare_version);
     if numeric_version<4.3 %Starting in Dynare 4.3.0, dr1 is removed. 
         [dr,~,~,~,~] = dr1(oo_.dr,0,M_,options_,oo_);
@@ -37,18 +37,14 @@ if options_.order>=3 && options_.pruning == 0 %make sure the solution is a third
         [dr,~] = stochastic_solvers(oo_.dr,0,M_,options_,oo_);   
     else
         disp('Error, no certainty equivalent dr calculated');
-    end;
-    if numeric_version >= 4.4 
-        nstatic = M_.nstatic;
-        nspred = M_.nspred; % note M_.nspred = M_.npred+M_.nboth;
-        nboth = M_.nboth;
-        nfwrd = M_.nfwrd;
-    else
-        nstatic = oo_.dr.nstatic;
-        nspred = oo_.dr.npred;
-        nboth = oo_.dr.nboth;
-        nfwrd = oo_.dr.nfwrd;
     end
+    assert( numeric_version >= 4.4 );
+
+    % nstatic = M_.nstatic;
+    nspred = M_.nspred; % note M_.nspred = M_.npred+M_.nboth;
+    % nboth = M_.nboth;
+    % nfwrd = M_.nfwrd;
+
     oo_.dr.ghx=dr.ghx;
     oo_.dr.ghu=dr.ghu;
     oo_.exo_simul = exo_simul;
