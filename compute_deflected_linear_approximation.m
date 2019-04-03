@@ -1,4 +1,4 @@
-function [deflect_]=compute_deflected_linear_approximation(M,options,oo,ModeRSS1OrMean2)
+function [ deflect_, M, oo ] = compute_deflected_linear_approximation( M, options, oo, ModeRSS1OrMean2 )
 
 % Copyright: Alexander Meyer-Gohde 2016, Tom Holden 2018 (only slight modifications from TH)
 
@@ -37,7 +37,6 @@ if options.order>=1
     deflect_.y_u=oo.dr.ghu;
 end
 if options.order>=2
-    %accumulate=(eye(M_.endo_nbr)-deflect_.y_y)\eye(size(speye(M_.endo_nbr)));%inv(eye(M_.endo_nbr)-deflect_.y_y);
     if ModeRSS1OrMean2==2
         x_2=(eye(nspred)-oo.dr.ghx(nstatic+1:nstatic+nspred,:))\(oo.dr.ghuu(nstatic+1:nstatic+nspred,:)*vec(M.Sigma_e)+oo.dr.ghxx(nstatic+1:nstatic+nspred,:)*vec(state_var)+oo.dr.ghs2(nstatic+1:nstatic+nspred,:));
         y_2=[oo.dr.ghx(1:nstatic,:)*x_2+oo.dr.ghuu(1:nstatic,:)*vec(M.Sigma_e)+oo.dr.ghxx(1:nstatic,:)*vec(state_var)+oo.dr.ghs2(1:nstatic,:);x_2;oo.dr.ghx(nstatic+nspred+1:M.endo_nbr,:)*x_2+oo.dr.ghuu(nstatic+nspred+1:M.endo_nbr,:)*vec(M.Sigma_e)+oo.dr.ghxx(nstatic+nspred+1:M.endo_nbr,:)*vec(state_var)+oo.dr.ghs2(nstatic+nspred+1:M.endo_nbr,:)];
@@ -46,8 +45,6 @@ if options.order>=2
         x_2=(eye(nspred)-oo.dr.ghx(nstatic+1:nstatic+nspred,:))\(oo.dr.ghs2(nstatic+1:nstatic+nspred,:));
         y_2=[oo.dr.ghx(1:nstatic,:)*x_2+oo.dr.ghs2(1:nstatic,:);x_2;oo.dr.ghx(nstatic+nspred+1:M.endo_nbr,:)*x_2+oo.dr.ghs2(nstatic+nspred+1:M.endo_nbr,:)];
         deflect_.x_2=x_2;
-        %y_2_alt=(eye(M_.endo_nbr)-[zeros(M_.endo_nbr,nstatic),oo_.dr.ghx,zeros(M_.endo_nbr,nfwrd)])\oo_.dr.ghs2;
-        %max(max(abs(y_2_alt-y_2)))
         deflect_.y=deflect_.y+0.5*y_2;
     end
 end
